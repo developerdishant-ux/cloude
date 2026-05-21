@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy FanArena - Live Match Community</title>
+    <!-- Tailwind CSS for modern, responsive, utility-first styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for clean UI symbology -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Modern Clean Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Custom scrollbar to keep UI look clean */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        /* Simple floating animation for active crowd emojis */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100%) scale(0.6);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-400px) scale(1.4);
+                opacity: 0;
+            }
+        }
+        .reaction-emoji {
+            position: absolute;
+            bottom: 0;
+            pointer-events: none;
+            animation: floatUp 2.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Header / App Brand -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 bg-gradient-to-tr from-rose-600 to-amber-500 rounded-lg flex items-center justify-center shadow">
+                <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+            </div>
+            <div>
+                <span class="text-lg font-bold tracking-tight">FAN<span class="text-rose-500">ARENA</span></span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded ml-2">SIMPLIFIED</span>
+            </div>
+        </div>
+        
+        <!-- Live Global Status indicator -->
+        <div class="flex items-center space-x-2 bg-slate-950 px-3 py-1.5 rounded-full border border-slate-850">
+            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
+            <span class="text-xs text-slate-300 font-semibold" id="online-counter">1,420 fans cheering online</span>
+        </div>
+    </header>
+
+    <!-- Main Two-Column Layout -->
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <!-- Column 1: Match Live Feed & Chat (Left / Main) -->
+        <div class="flex-1 flex flex-col overflow-hidden border-r border-slate-900 bg-slate-950">
+            
+            <!-- Active Scoreboard Widget -->
+            <div class="bg-gradient-to-b from-slate-900 to-slate-950 p-4 border-b border-slate-900/80 shadow">
+                <div class="flex items-center justify-between max-w-2xl mx-auto">
+                    <!-- Home Team -->
+                    <div class="text-center w-1/3">
+                        <div class="text-2xl">🦁</div>
+                        <h2 class="text-sm font-bold mt-1">Gooners FC</h2>
+                        <span class="text-[10px] text-red-400 font-semibold uppercase">Home</span>
+                    </div>
+
+                    <!-- Live Score & Time -->
+                    <div class="flex flex-col items-center bg-slate-900 px-4 py-2 rounded-xl border border-slate-800">
+                        <span class="text-[10px] bg-red-500/20 text-red-400 font-bold px-2 py-0.5 rounded-full animate-pulse">LIVE</span>
+                        <div class="flex items-center space-x-3 my-1">
+                            <span class="text-2xl font-black" id="score-home">1</span>
+                            <span class="text-slate-500">-</span>
+                            <span class="text-2xl font-black" id="score-away">1</span>
+                        </div>
+                        <span class="text-xs font-mono text-slate-400 font-semibold" id="match-timer">74:00</span>
+                    </div>
+
+                    <!-- Away Team -->
+                    <div class="text-center w-1/3">
+                        <div class="text-2xl">🦅</div>
+                        <h2 class="text-sm font-bold mt-1">Blues FC</h2>
+                        <span class="text-[10px] text-blue-400 font-semibold uppercase">Away</span>
+                    </div>
+                </div>
+                
+                <!-- Match Milestone Feed Bar -->
+                <div class="mt-3 text-center border-t border-slate-900 pt-2 text-[11px] text-slate-400">
+                    Latest Highlight: <span class="text-slate-200 font-medium" id="latest-highlight">38' Goal scored by Palmer (Blues FC)</span>
+                </div>
+            </div>
+
+            <!-- Chat Logs Container -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 relative" id="chat-box">
+                
+                <!-- Seed Chat Messages -->
+                <div class="flex items-start space-x-3 bg-slate-900/40 p-2.5 rounded-xl border border-slate-900/60">
+                    <span class="text-lg mt-0.5">🦁</span>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold text-red-400">GunnerSteve</span>
+                            <span class="text-[9px] text-slate-500">74'</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-0.5">We need to lock down the midfield. Chelsea is finding too much room on the wings!</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-3 bg-slate-900/40 p-2.5 rounded-xl border border-slate-900/60">
+                    <span class="text-lg mt-0.5">🦅</span>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold text-blue-400">BlueSky</span>
+                            <span class="text-[9px] text-slate-500">75'</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-0.5">Nervous finish ahead! If Palmer gets another clean look we can steal all three points here.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Interactions & Input -->
+            <div class="bg-slate-950 border-t border-slate-900 p-3 space-y-2.5 shrink-0 z-20">
+                <!-- Emoji Reaction Bar -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mr-1">React to Play:</span>
+                        <button onclick="sendEmoji('🔥')" class="hover:scale-125 transition-transform p-1 bg-slate-900 hover:bg-slate-800 rounded border border-slate-800 text-sm">🔥</button>
+                        <button onclick="sendEmoji('🤬')" class="hover:scale-125 transition-transform p-1 bg-slate-900 hover:bg-slate-800 rounded border border-slate-800 text-sm">🤬</button>
+                        <button onclick="sendEmoji('🤯')" class="hover:scale-125 transition-transform p-1 bg-slate-900 hover:bg-slate-800 rounded border border-slate-800 text-sm">🤯</button>
+                        <button onclick="sendEmoji('👏')" class="hover:scale-125 transition-transform p-1 bg-slate-900 hover:bg-slate-800 rounded border border-slate-800 text-sm">👏</button>
+                    </div>
+                    <span class="text-[10px] text-slate-500 italic" id="status-bubble">Match context active</span>
+                </div>
+
+                <!-- Chat Input Form -->
+                <form id="message-form" class="flex items-center space-x-2">
+                    <input type="text" id="message-input" placeholder="Type a message or react to live action..." class="flex-1 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none transition-all" required autocomplete="off">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-4 py-2 text-xs font-bold flex items-center space-x-1 shadow transition">
+                        <span>Send</span>
+                        <i data-lucide="send" class="w-3 h-3"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Column 2: Fan Controls & Engagement (Right Sidebar) -->
+        <aside class="w-80 p-4 space-y-4 overflow-y-auto hidden md:block bg-slate-950 shrink-0">
+            
+            <!-- Interactive Allegiance Selector -->
+            <div class="bg-slate-900 border border-slate-800/80 p-3.5 rounded-2xl space-y-2.5">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center">
+                        <i data-lucide="shield" class="w-3.5 h-3.5 mr-1.5 text-indigo-400"></i> Set Your Allegiance
+                    </h3>
+                    <p class="text-[10px] text-slate-400">Pick a side to customized your chat tag and score bias points.</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="selectTeam('red')" id="btn-team-red" class="p-2 rounded-xl bg-red-950/20 border border-red-900/30 hover:bg-red-950/40 text-center transition flex flex-col items-center">
+                        <span class="text-base">🦁</span>
+                        <span class="text-[9px] font-bold text-red-400 mt-1 uppercase">Gooners</span>
+                    </button>
+                    <button onclick="selectTeam('blue')" id="btn-team-blue" class="p-2 rounded-xl bg-blue-950/20 border border-blue-900/30 hover:bg-blue-950/40 text-center transition flex flex-col items-center">
+                        <span class="text-base">🦅</span>
+                        <span class="text-[9px] font-bold text-blue-400 mt-1 uppercase">Blues</span>
+                    </button>
+                </div>
+                <div class="text-[10px] text-slate-400 text-center bg-slate-950 py-1 rounded border border-slate-850">
+                    My Profile: <span id="profile-tag" class="font-bold text-slate-200">Neutral Fan ⚖️</span>
+                </div>
+            </div>
+
+            <!-- Predictor Widget -->
+            <div class="bg-slate-900 border border-slate-800/80 p-3.5 rounded-2xl space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center">
+                        <i data-lucide="target" class="w-3.5 h-3.5 mr-1.5 text-amber-500"></i> Arena Prediction
+                    </h3>
+                    <span class="text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1 py-0.2 rounded font-bold">PREDICT</span>
+                </div>
+                <p class="text-[11px] text-slate-400">Who will secure the next match event (corner or goal)?</p>
+                <div class="space-y-1.5" id="prediction-options">
+                    <button onclick="makePrediction('Gooners FC')" class="w-full py-1.5 bg-slate-950 hover:bg-slate-850 border border-slate-800 rounded-lg text-[10px] text-slate-300 transition">
+                        🦁 Gooners FC
+                    </button>
+                    <button onclick="makePrediction('Blues FC')" class="w-full py-1.5 bg-slate-950 hover:bg-slate-850 border border-slate-800 rounded-lg text-[10px] text-slate-300 transition">
+                        🦅 Blues FC
+                    </button>
+                </div>
+                <div id="prediction-result" class="hidden text-center text-xs font-bold text-emerald-400 bg-emerald-950/30 border border-emerald-900/40 py-2 rounded-lg">
+                    Prediction locked! Let's watch the play...
+                </div>
+            </div>
+
+            <!-- Debate Poll Widget -->
+            <div class="bg-slate-900 border border-slate-800/80 p-3.5 rounded-2xl space-y-2.5">
+                <div class="flex items-center space-x-1.5 text-xs text-amber-500 font-bold">
+                    <i data-lucide="vote" class="w-3.5 h-3.5"></i>
+                    <span>Match Debate Poll</span>
+                </div>
+                <h4 class="text-xs font-bold text-slate-200 leading-tight">Was that 55' sliding challenge worthy of a red card?</h4>
+                
+                <div class="space-y-2 pt-1" id="poll-options">
+                    <button onclick="submitVote('yes')" class="w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 border border-slate-850 hover:border-slate-700 text-xs text-slate-300 font-medium transition flex justify-between">
+                        <span>Yes, definitely red.</span>
+                        <span class="text-[10px] text-slate-500">62%</span>
+                    </button>
+                    <button onclick="submitVote('no')" class="w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 border border-slate-850 hover:border-slate-700 text-xs text-slate-300 font-medium transition flex justify-between">
+                        <span>No, fair tactical challenge.</span>
+                        <span class="text-[10px] text-slate-500">38%</span>
+                    </button>
+                </div>
+
+                <div id="poll-results" class="hidden space-y-2 text-xs">
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-slate-400">
+                            <span>Yes, red card</span>
+                            <span class="font-bold text-red-400">65%</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                            <div class="bg-red-500 h-full" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-slate-400">
+                            <span>No, clear challenge</span>
+                            <span class="font-bold text-blue-400">35%</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                            <div class="bg-blue-400 h-full" style="width: 35%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Application Logic / Simplicity Engine -->
+    <script>
+        // Central Application State
+        const state = {
+            selectedTeam: 'neutral', // 'neutral', 'red', or 'blue'
+            currentMatchMinute: 74,
+            homeScore: 1,
+            awayScore: 1,
+            userHasPredicted: false,
+            userHasVoted: false
+        };
+
+        // Initialize Lucide Icons on launch
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            startMatchSimulator();
+            setupChatHandler();
+        });
+
+        // Team Allegiance Selection Handler
+        function selectTeam(team) {
+            state.selectedTeam = team;
+            
+            const btnRed = document.getElementById('btn-team-red');
+            const btnBlue = document.getElementById('btn-team-blue');
+            const profileTag = document.getElementById('profile-tag');
+
+            // Reset standard styles
+            btnRed.className = "p-2 rounded-xl bg-red-950/20 border border-red-900/30 hover:bg-red-950/40 text-center transition flex flex-col items-center";
+            btnBlue.className = "p-2 rounded-xl bg-blue-950/20 border border-blue-900/30 hover:bg-blue-950/40 text-center transition flex flex-col items-center";
+
+            // Apply selected styling
+            if (team === 'red') {
+                btnRed.className = "p-2 rounded-xl bg-red-600/30 border-2 border-red-500 text-center transition flex flex-col items-center shadow-lg shadow-red-950/20";
+                profileTag.innerText = "Gooners Supporter 🦁";
+                profileTag.className = "font-bold text-red-400";
+            } else if (team === 'blue') {
+                btnBlue.className = "p-2 rounded-xl bg-blue-600/30 border-2 border-blue-500 text-center transition flex flex-col items-center shadow-lg shadow-blue-950/20";
+                profileTag.innerText = "Blues Supporter 🦅";
+                profileTag.className = "font-bold text-blue-400";
+            }
+        }
+
+        // Live Score & Timeline Simulator
+        function startMatchSimulator() {
+            const timerElement = document.getElementById('match-timer');
+            const scoreHomeElement = document.getElementById('score-home');
+            const scoreAwayElement = document.getElementById('score-away');
+            const highlightBar = document.getElementById('latest-highlight');
+
+            // Game loops: updates game details every few seconds to replicate live action
+            const matchInterval = setInterval(() => {
+                if (state.currentMatchMinute < 90) {
+                    state.currentMatchMinute++;
+                    timerElement.innerText = `${state.currentMatchMinute}:00`;
+
+                    // Scripted Highlights to keep dashboard live & exciting
+                    if (state.currentMatchMinute === 78) {
+                        highlightBar.innerText = "78' Great defensive block by Gooners FC backline!";
+                        simulateOpponentMessage("GoonerSteve", "That was incredibly close! Excellent tackling.");
+                    } else if (state.currentMatchMinute === 83) {
+                        // GOAL milestone
+                        state.homeScore = 2;
+                        scoreHomeElement.innerText = "2";
+                        highlightBar.innerText = "83' GOAL! Gooners FC 2 - 1! Saka strikes beautifully from the right flank!";
+                        
+                        // Spawn crowd reactions!
+                        for (let i = 0; i < 10; i++) {
+                            setTimeout(() => sendEmoji('⚽'), i * 150);
+                        }
+                        simulateOpponentMessage("GunnerSteve", "SAKAAAAAA!!! I knew we had this in us! What a clinical strike! 🦁");
+                    } else if (state.currentMatchMinute === 88) {
+                        highlightBar.innerText = "88' Yellow Card shown to Chelsea midfielder for defensive pullback.";
+                        simulateOpponentMessage("BlueSky", "Ref has completely lost control of this game, never a yellow card.");
+                    }
+                } else {
+                    timerElement.innerText = "90:00 (FT)";
+                    highlightBar.innerText = "Full Time! Match concluded Gooners FC 2 - 1 Blues FC.";
+                    clearInterval(matchInterval);
+                }
+            }, 8000); // 8 seconds mimics 1 in-game minute
+        }
+
+        // Active Chat & Messaging Handler
+        function setupChatHandler() {
+            const form = document.getElementById('message-form');
+            const input = document.getElementById('message-input');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = input.value.trim();
+                if (!text) return;
+
+                appendMessage("You (Fan)", text, state.selectedTeam === 'red' ? '🦁' : state.selectedTeam === 'blue' ? '🦅' : '⚖️');
+                input.value = '';
+            });
+        }
+
+        function appendMessage(sender, text, iconTag) {
+            const chatBox = document.getElementById('chat-box');
+            const messageElement = document.createElement('div');
+            
+            // Adjust message border based on selected allegiance alignment
+            let borderStyle = "border-slate-900 bg-slate-900/40";
+            let colorStyle = "text-indigo-400";
+            if (iconTag === '🦁') {
+                borderStyle = "border-red-900/40 bg-red-950/10";
+                colorStyle = "text-red-400 font-bold";
+            } else if (iconTag === '🦅') {
+                borderStyle = "border-blue-900/40 bg-blue-950/10";
+                colorStyle = "text-blue-400 font-bold";
+            }
+
+            messageElement.className = `flex items-start space-x-3 p-2.5 rounded-xl border ${borderStyle}`;
+            messageElement.innerHTML = `
+                <span class="text-lg mt-0.5">${iconTag}</span>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs ${colorStyle}">${sender}</span>
+                        <span class="text-[9px] text-slate-500">${state.currentMatchMinute}'</span>
+                    </div>
+                    <p class="text-xs text-slate-300 mt-0.5">${text}</p>
+                </div>
+            `;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Simulating incoming fan comments for high community feel
+        function simulateOpponentMessage(sender, text) {
+            const isHome = sender.toLowerCase().includes('gunner') || sender.toLowerCase().includes('gooner');
+            const icon = isHome ? '🦁' : '🦅';
+            setTimeout(() => {
+                appendMessage(sender, text, icon);
+            }, 1000);
+        }
+
+        // Quick Reaction Floating Emojis
+        function sendEmoji(emoji) {
+            const container = document.getElementById('chat-box');
+            const emojiEl = document.createElement('div');
+            emojiEl.innerText = emoji;
+            emojiEl.className = 'reaction-emoji text-3xl z-30';
+            
+            // Set random horizontal alignment spread
+            const randomX = Math.random() * 80 + 10; // offset between 10% and 90%
+            emojiEl.style.left = `${randomX}%`;
+
+            container.appendChild(emojiEl);
+            
+            // Auto delete emoji node after transition animation completes
+            setTimeout(() => {
+                emojiEl.remove();
+            }, 2500);
+        }
+
+        // Easy Predictor Lock Handler
+        function makePrediction(teamName) {
+            if (state.userHasPredicted) return;
+            state.userHasPredicted = true;
+
+            document.getElementById('prediction-options').classList.add('hidden');
+            
+            const resultBox = document.getElementById('prediction-result');
+            resultBox.innerText = `Prediction locked for: ${teamName}`;
+            resultBox.classList.remove('hidden');
+        }
+
+        // Easy Debate Poll Submission Handler
+        function submitVote(choice) {
+            if (state.userHasVoted) return;
+            state.userHasVoted = true;
+
+            document.getElementById('poll-options').classList.add('hidden');
+            document.getElementById('poll-results').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
